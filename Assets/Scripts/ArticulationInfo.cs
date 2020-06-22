@@ -20,6 +20,10 @@ public class ArticulationInfo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!ab.enabled) {
+            return;
+        }
+
         if (ab.jointType == ArticulationJointType.RevoluteJoint && ab.transform.parent != null) {
             text.text = $"Actual {(ab.jointPosition[0] / Mathf.PI * 180f).ToString("F0")}";
         } else {
@@ -35,7 +39,20 @@ public class ArticulationInfo : MonoBehaviour
 
     [ContextMenu("Test")]
     public void Test() {
-        ab.jointPosition = new ArticulationReducedSpace(Mathf.PI * 0.5f, 0, 0);
+        List<float> positions = new List<float>();
+        List<float> velocities = new List<float>();
+        
+        var dofCount = ab.GetJointPositions(positions);
+        ab.GetJointVelocities(velocities);
+
+        for(int i=0; i<dofCount; i++) {
+            positions[i] = 0;
+            velocities[i] = 0;
+        }
+
+        ab.SetJointPositions(positions);
+        ab.SetJointVelocities(velocities);
+
     }
 
 
@@ -44,8 +61,16 @@ public class ArticulationInfo : MonoBehaviour
         List<float> positions = new List<float>();
         List<float> velocities = new List<float>();
         
-        ab.GetJointPositions(positions);
+        var dofCount = ab.GetJointPositions(positions);
         ab.GetJointVelocities(velocities);
+
+        // for(int i=0; i<dofCount; i++) {
+        //     positions[i] = 0;
+        //     velocities[i] = 0;
+        // }
+
+        ab.SetJointPositions(positions);
+        ab.SetJointVelocities(velocities);
 
         foreach (float p in positions)
         {
@@ -56,5 +81,17 @@ public class ArticulationInfo : MonoBehaviour
         {
             Debug.Log($"velocity {v}");
         }
+    }
+
+    [ContextMenu("SetPositions")]
+    public void TestSetPositions() {
+        var positions = new List<float>();
+        var dofCount = ab.GetJointPositions(positions);
+
+        for(int i=0; i<dofCount; i++) {
+            positions[i] = 0;
+        }
+
+        ab.SetJointPositions(positions);
     }
 }
